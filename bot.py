@@ -22,11 +22,4 @@ async def on_ready():
           f'{guild.name}(id: {guild.id})')
 
 
-class CustomClient(discord.Client):
-    async def on_ready(self):
-        print(f'{self.user} has connected!')
-
-
-# client.run(TOKEN)
-custom_client = CustomClient()
-custom_client.run(TOKEN)
+client.run(TOKEN)
