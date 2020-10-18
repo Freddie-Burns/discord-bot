@@ -1,5 +1,7 @@
 """
 Implement higher or lower bot more neatly as a class.
+Update the environment variables on the host server to set the
+DEATH_PROB, MAX_SLEEP, and TOKEN.
 """
 
 import os
@@ -13,7 +15,7 @@ from dotenv import load_dotenv
 load_dotenv()
 DEATH_PROB = float(os.getenv('DEATH_PROB'))
 MAX_SLEEP = float(os.getenv('MAX_SLEEP'))
-TOKEN = os.getenv('TEST_TOKEN')
+TOKEN = os.getenv('DISCORD_TOKEN')
 
 
 class BetEnum:
