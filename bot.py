@@ -24,6 +24,14 @@ async def on_ready():
     print(f'{bot.user} has connected to Discord!')
 
 
+@bot.command(name='horl')
+async def higher_or_lower(ctx):
+    global current_roll
+    response = random.randint(1, 6)
+    current_roll = response
+    await ctx.send(response)
+
+
 @bot.command(name='higher', aliases=['h', 'hi'])
 async def higher(ctx):
     if did_i_die():
