@@ -24,7 +24,7 @@ async def on_ready():
 
 class CustomClient(discord.Client):
     async def on_ready(self):
-        print(f'{client.user} has connected!')
+        print(f'{self.user} has connected!')
 
 
 # client.run(TOKEN)
