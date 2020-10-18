@@ -39,6 +39,7 @@ class HigherOrLowerBot(commands.Bot):
             BetEnum.high: self._bet_high,
         }
         self.first_value = None
+        self.sides = None
         self.command_kwargs = {
             self.first_roll: {
                 'parent': self,
@@ -68,23 +69,24 @@ class HigherOrLowerBot(commands.Bot):
 
     async def first_roll(self, ctx, sides=6):
         self.first_value = random.randint(1, sides)
+        self.sides = sides
         await ctx.send(self.first_value)
 
-    async def lower(self, ctx, sides=6):
-        await self._second_roll(ctx, BetEnum.low, sides)
+    async def lower(self, ctx):
+        await self._second_roll(ctx, BetEnum.low)
 
-    async def same(self, ctx, sides=6):
-        await self._second_roll(ctx, BetEnum.same, sides)
+    async def same(self, ctx):
+        await self._second_roll(ctx, BetEnum.same)
 
-    async def higher(self, ctx, sides=6):
-        await self._second_roll(ctx, BetEnum.high, sides)
+    async def higher(self, ctx):
+        await self._second_roll(ctx, BetEnum.high)
 
-    async def _second_roll(self, ctx, bet_enum, sides):
+    async def _second_roll(self, ctx, bet_enum):
         if did_i_die():
             await ctx.send("You died...")
             return
         await ctx.send("rolling...")
-        second_value = random.randint(1, sides)
+        second_value = random.randint(1, self.sides)
         outcome = self.bet_outcomes[bet_enum](second_value)
         sleep_time = random.randint(0, MAX_SLEEP)
         print(f"sleep {sleep_time}s")
