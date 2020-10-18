@@ -17,7 +17,7 @@ client = discord.Client()
 
 @client.event
 async def on_ready():
-    guild = discord.utils.find(lambda g: g.name == GUILD, client.guilds)
+    guild = discord.utils.get(client.guilds, GUILD)
     print(f'{client.user} has connected to the guild:\n'
           f'{guild.name}(id: {guild.id})')
 
