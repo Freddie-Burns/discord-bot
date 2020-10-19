@@ -67,6 +67,7 @@ class HigherOrLowerBot(commands.Bot):
             self.first_roll: {
                 'parent': self,
                 'name': 'horl',
+                'aliases': ['higherorlower',]
             },
             self.lower: {
                 'parent': self,
