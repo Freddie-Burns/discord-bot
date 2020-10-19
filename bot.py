@@ -155,7 +155,7 @@ class HigherOrLowerBot(commands.Bot):
     @staticmethod
     async def _suspense_messages(ctx):
         # Wait random time and log to the console.
-        msg_num = random.randint(0, MAX_SLEEP)
+        msg_num = random.randint(1, MAX_SLEEP)
         print(f"sleep {msg_num}")
         for i in range(msg_num):
             dots = '.' * i
