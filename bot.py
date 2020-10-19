@@ -18,6 +18,13 @@ MAX_SLEEP = float(os.getenv('MAX_SLEEP'))
 TOKEN = os.getenv('DISCORD_TOKEN')
 
 
+def main():
+    bot = HigherOrLowerBot()
+    @bot.event
+    async def on_ready(): print(f'{bot.user} has connected to Discord!')
+    bot.run(TOKEN)
+
+
 class BetEnum:
     low = 0
     same = 1
@@ -40,6 +47,8 @@ class HigherOrLowerBot(commands.Bot):
         }
         self.first_value = None
         self.sides = None
+
+        # Kwargs needed to create commands out of methods.
         self.command_kwargs = {
             self.first_roll: {
                 'parent': self,
@@ -64,8 +73,9 @@ class HigherOrLowerBot(commands.Bot):
         self._add_all_commands()
 
     def _add_all_commands(self):
-        for func, kwargs in self.command_kwargs.items():
-            self.add_command(commands.command(**kwargs)(func))
+        """Create commands from methods, add them to internal list."""
+        for meth, kwargs in self.command_kwargs.items():
+            self.add_command(commands.command(**kwargs)(meth))
 
     async def first_roll(self, ctx, sides=6):
         self.first_value = random.randint(1, sides)
@@ -82,16 +92,28 @@ class HigherOrLowerBot(commands.Bot):
         await self._second_roll(ctx, BetEnum.high)
 
     async def _second_roll(self, ctx, bet_enum):
+        """Based on params of first roll & the bet made."""
         if did_i_die():
             await ctx.send("You died...")
+            self.first_value, self.sides = None, None
             return
+
+        # Choose rand int with same range as first roll.
         await ctx.send("rolling...")
         second_value = random.randint(1, self.sides)
+
+        # Msg str of success/failure ctx sends to the chat.
+        # Uses bet_enum value to choose method from dict.
         outcome = self.bet_outcomes[bet_enum](second_value)
+
+        # Wait random time and log to the console.
         sleep_time = random.randint(0, MAX_SLEEP)
         print(f"sleep {sleep_time}s")
         time.sleep(sleep_time)
+
+        # Send msg and reset roll params.
         await ctx.send(outcome)
+        self.first_value, self.sides = None, None
 
     def _bet_low(self, second_roll):
         if self.first_value is None:
@@ -125,20 +147,9 @@ class HigherOrLowerBot(commands.Bot):
 
 
 def did_i_die():
+    """DEATH_PROB chance of returning True."""
     return random.random() < DEATH_PROB
 
 
-bot = HigherOrLowerBot()
-
-
-@bot.event
-async def on_ready():
-    print(f'{bot.user} tester has connected to Discord!')
-
-
-@bot.command(name='cancel', aliases=['c', 'e', 'q', 'exit', 'quit'])
-async def cancel(ctx):
-    await ctx.send("cancel")
-
-
-bot.run(TOKEN)
+if __name__ == '__main__':
+    main()
