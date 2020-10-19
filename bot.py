@@ -156,7 +156,11 @@ class HigherOrLowerBot(commands.Bot):
     async def _suspense_messages(ctx):
         # Wait random time and log to the console.
         msg_num = random.randint(1, MAX_SLEEP)
+
+        # Log sleep time.
         print(f"sleep {msg_num}")
+
+        # Build tension by sending "rolling" messages.
         for i in range(msg_num):
             dots = '.' * i
             await ctx.send(f"rolling {dots}")
