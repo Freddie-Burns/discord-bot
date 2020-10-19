@@ -160,7 +160,7 @@ class HigherOrLowerBot(commands.Bot):
         for i in range(msg_num):
             dots = '.' * i
             await ctx.send(f"rolling {dots}")
-            time.sleep(i * SLEEP_STEP)
+            time.sleep((i+1) * SLEEP_STEP)
 
 
 def did_i_die():
