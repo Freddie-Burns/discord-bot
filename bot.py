@@ -19,8 +19,8 @@ MAX_SLEEP = float(os.getenv('MAX_SLEEP'))
 SLEEP_STEP = float(os.getenv('SLEEP_STEP'))
 TOKEN = os.getenv('DISCORD_TOKEN')
 
-BAD_EMOJIS = os.getenv('BAD_EMOJIS').split(',')
-GOOD_EMOJIS = os.getenv('GOOD_EMOJIS').split(',')
+GOOD_EMOJIS = "🤩,🥳,😘,🤗,😲,👽,😼,🎉,🎀,🎊".split(',')
+BAD_EMOJIS = "🙃,🤬,😭,😤,🥺,😖,😒,🤯,🥵,🥶,😱,😳,👹,⛈,💔,❌,⛔,🔕,☠".split('.')
 
 
 def main():
