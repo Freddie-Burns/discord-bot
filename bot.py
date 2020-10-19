@@ -121,7 +121,7 @@ class HigherOrLowerBot(commands.Bot):
         elif second_roll < self.first_value:
             return f"{second_roll} - Lower was correct! 🎉"
         elif second_roll >= self.first_value:
-            return f"{second_roll} - Lower was wrong. ❌"
+            return f"{second_roll} - Lower was wrong. 💔"
         else:
             return "Something went wrong!"
 
@@ -131,7 +131,7 @@ class HigherOrLowerBot(commands.Bot):
         elif second_roll == self.first_value:
             return f"{second_roll} - The same was correct! 🎉"
         elif second_roll < self.first_value or second_roll > self.first_value:
-            return f"{second_roll} - The same was wrong. ❌"
+            return f"{second_roll} - The same was wrong. 💔"
         else:
             return "Something went wrong!"
 
@@ -141,7 +141,7 @@ class HigherOrLowerBot(commands.Bot):
         elif second_roll > self.first_value:
             return f"{second_roll} - Higher was correct! 🎉"
         elif second_roll <= self.first_value:
-            return f"{second_roll} - Higher was wrong. ❌"
+            return f"{second_roll} - Higher was wrong. 💔"
         else:
             return "Something went wrong!"
 
