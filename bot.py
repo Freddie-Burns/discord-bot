@@ -175,7 +175,9 @@ class HigherOrLowerBot(commands.Bot):
             return f"{self.second_value} - {bet_str} was correct! {emoji}"
         else:
             emoji = random.choice(BAD_EMOJIS)
-            return f"{self.second_value} - {bet_str} you lose. {emoji}"
+            message = f"{self.second_value} - {bet_str} was wrong, "\
+                      f"you lose. {emoji}"
+            return message
 
     def _reset_roll_params(self):
         self.first_value = None
