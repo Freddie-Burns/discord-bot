@@ -62,6 +62,7 @@ class HigherOrLowerBot(commands.Bot):
         self.sides = None
         self.success = None
         self.bet_enum = None
+        self.is_rx_on = True
 
         # Kwargs needed to create commands out of methods.
         self.command_kwargs = {
@@ -89,21 +90,34 @@ class HigherOrLowerBot(commands.Bot):
         self._add_all_commands()
 
     async def first_roll(self, ctx, sides=6):
-        self.first_value = random.randint(1, sides)
-        self.sides = sides
-        await ctx.send(self.first_value)
+        if self.is_rx_on:
+            # Lock out other commands.
+            self.is_rx_on = False
+            self.first_value = random.randint(1, sides)
+            self.sides = sides
+            await ctx.send(self.first_value)
+            self.is_rx_on = True
 
     async def higher(self, ctx):
-        self.bet_enum = BetEnum.higher
-        await self._second_roll(ctx)
+        if self.is_rx_on:
+            self.is_rx_on = False
+            self.bet_enum = BetEnum.higher
+            await self._second_roll(ctx)
+            self.is_rx_on = True
 
     async def lower(self, ctx):
-        self.bet_enum = BetEnum.lower
-        await self._second_roll(ctx)
+        if self.is_rx_on:
+            self.is_rx_on = False
+            self.bet_enum = BetEnum.lower
+            await self._second_roll(ctx)
+            self.is_rx_on = True
 
     async def same(self, ctx):
-        self.bet_enum = BetEnum.same
-        await self._second_roll(ctx)
+        if self.is_rx_on:
+            self.is_rx_on = False
+            self.bet_enum = BetEnum.same
+            await self._second_roll(ctx)
+            self.is_rx_on = True
 
     def _add_all_commands(self):
         """Create commands from methods, add them to internal list."""
@@ -139,12 +153,10 @@ class HigherOrLowerBot(commands.Bot):
         else:
             # Choose rand int with same range as first roll.
             self.second_value = random.randint(1, self.sides)
-
             # Uses bet_enum value to choose operation from dict.
             math_op = self.bet_operator[self.bet_enum]
             self.success = math_op(self.second_value, self.first_value)
             message = self._bet_message()
-
             # Build tension.
             await self._suspense_messages(ctx)
 
@@ -156,7 +168,6 @@ class HigherOrLowerBot(commands.Bot):
     async def _suspense_messages(ctx):
         # Wait random time and log to the console.
         msg_num = random.randint(1, MAX_SLEEP)
-
         # Log sleep time.
         print(f"sleep {msg_num}")
 
