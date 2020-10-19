@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 load_dotenv(encoding='utf-8')
 DEATH_PROB = float(os.getenv('DEATH_PROB'))
 MAX_SLEEP = float(os.getenv('MAX_SLEEP'))
-TOKEN = os.getenv('TEST_TOKEN')
+TOKEN = os.getenv('DISCORD_TOKEN')
 
 BAD_EMOJIS = os.getenv('BAD_EMOJIS').split(',')
 GOOD_EMOJIS = os.getenv('GOOD_EMOJIS').split(',')
@@ -118,11 +118,10 @@ class HigherOrLowerBot(commands.Bot):
 
         else:
             # Choose rand int with same range as first roll.
-            await ctx.send("rolling...")
             self.second_value = random.randint(1, self.sides)
+            await ctx.send("rolling...")
 
-            # Msg str of success/failure ctx sends to the chat.
-            # Uses bet_enum value to choose method from dict.
+            # Uses bet_enum value to choose operation from dict.
             math_op = self.bet_operator[self.bet_enum]
             self.success = math_op(self.second_value, self.first_value)
             message = self._bet_message()
