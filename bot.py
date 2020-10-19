@@ -132,7 +132,7 @@ class HigherOrLowerBot(commands.Bot):
             message = "Roll before betting."
 
         elif did_i_die():
-            message = "You died..."
+            message = "You died... 🙃"
 
         else:
             # Choose rand int with same range as first roll.
