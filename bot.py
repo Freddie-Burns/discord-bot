@@ -1,7 +1,7 @@
 """
 Implement higher or lower bot more neatly as a class.
 Update the environment variables on the host server to set the
-DEATH_PROB, MAX_SLEEP, and TOKEN.
+DEATH_PROB, MAX_SLEEP, TOKEN, and EMOJIS.
 """
 
 import operator
