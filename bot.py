@@ -9,6 +9,7 @@ import os
 import random
 import time
 from abc import ABC
+from enum import Enum
 
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -32,7 +33,7 @@ def main():
     bot.run(TOKEN)
 
 
-class BetEnum:
+class BetEnum(Enum):
     lower = 0
     same = 1
     higher = 2
@@ -121,6 +122,11 @@ class HigherOrLowerBot(commands.Bot):
                 'name': 'higher',
                 'aliases': ['h', 'hi'],
             },
+            self.random: {
+                'parent': self,
+                'name': 'random',
+                'aliases': ['r', 'rand'],
+            },
         }
         self._add_all_commands()
 
@@ -141,6 +147,12 @@ class HigherOrLowerBot(commands.Bot):
         with CheckRxChannel(self) as is_open:
             if is_open:
                 self.bet_enum = BetEnum.lower
+                await self._second_roll(ctx)
+
+    async def random(self, ctx):
+        with CheckRxChannel(self) as is_open:
+            if is_open:
+                self.bet_enum = random.choice(list(BetEnum))
                 await self._second_roll(ctx)
 
     async def same(self, ctx):
