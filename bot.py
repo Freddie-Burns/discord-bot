@@ -175,7 +175,7 @@ class HigherOrLowerBot(commands.Bot):
             return f"{self.second_value} - {bet_str} was correct! {emoji}"
         else:
             emoji = random.choice(BAD_EMOJIS)
-            return f"{self.second_value} - {bet_str} was wrong. {emoji}"
+            return f"{self.second_value} - {bet_str} you lose. {emoji}"
 
     def _reset_roll_params(self):
         self.first_value = None
@@ -186,12 +186,11 @@ class HigherOrLowerBot(commands.Bot):
 
     async def _second_roll(self, ctx):
         """Based on params of first roll & the bet made."""
+
         if self.first_value is None:
             message = "Roll before betting."
-
         elif did_i_die():
             message = "You died... 🙃"
-
         else:
             # Choose rand int with same range as first roll.
             self.second_value = random.randint(1, self.sides)
