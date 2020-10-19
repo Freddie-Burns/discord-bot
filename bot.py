@@ -17,7 +17,7 @@ load_dotenv(encoding='utf-8')
 DEATH_PROB = float(os.getenv('DEATH_PROB'))
 MAX_SLEEP = float(os.getenv('MAX_SLEEP'))
 SLEEP_STEP = float(os.getenv('SLEEP_STEP'))
-TOKEN = os.getenv('TEST_TOKEN')
+TOKEN = os.getenv('DISCORD_TOKEN')
 
 GOOD_EMOJIS = "🤩🥳😘🤗😲👽😼🎉🎀🎊"
 BAD_EMOJIS = "🙃🤬😭😤🥺😖😒🤯🥵🥶😱😳👹⛈💔❌⛔🔕"
