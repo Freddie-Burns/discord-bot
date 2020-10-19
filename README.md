@@ -10,3 +10,5 @@
 !Same - Bet the next roll will be the same.<br>
 !Higher - Bet the next roll will be higher.<br>
 </p>
+
+<h3>HigherOrLower#4520</h3>
