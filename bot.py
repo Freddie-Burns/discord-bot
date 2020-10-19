@@ -8,6 +8,7 @@ import operator
 import os
 import random
 import time
+from abc import ABC
 
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -17,7 +18,7 @@ load_dotenv(encoding='utf-8')
 DEATH_PROB = float(os.getenv('DEATH_PROB'))
 MAX_SLEEP = float(os.getenv('MAX_SLEEP'))
 SLEEP_STEP = float(os.getenv('SLEEP_STEP'))
-TOKEN = os.getenv('DISCORD_TOKEN')
+TOKEN = os.getenv('TEST_TOKEN')
 
 GOOD_EMOJIS = "🤩🥳😘🤗😲👽😼🎉🎀🎊"
 BAD_EMOJIS = "🙃🤬😭😤🥺😖😒🤯🥵🥶😱😳👹⛈💔❌⛔🔕"
@@ -43,16 +44,9 @@ bet_strings = {
 }
 
 
-class IHigherOrLowerBot(commands.Bot):
+class IHigherOrLowerBot(ABC):
     """Bot interface for type hinting context manager."""
-    def __init__(self, *args, **kwargs):
-        super().__init__(
-            command_prefix='!',
-            case_insensitive=True,
-            description="Come play the galaxy's favourite game!",
-            *args, **kwargs,
-        )
-        self.is_rx_on = True
+    is_rx_on = True
 
 
 class CheckRxChannel:
@@ -83,10 +77,15 @@ class CheckRxChannel:
             self.bot.is_rx_on = True
 
 
-class HigherOrLowerBot(IHigherOrLowerBot):
+class HigherOrLowerBot(commands.Bot):
     """Roll the dice."""
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs,)
+        super().__init__(
+            command_prefix='!',
+            case_insensitive=True,
+            description="Come play the galaxy's favourite game!",
+            *args, **kwargs,
+        )
         self.bet_operator = {
             BetEnum.lower: operator.lt,
             BetEnum.same: operator.eq,
@@ -97,6 +96,7 @@ class HigherOrLowerBot(IHigherOrLowerBot):
         self.sides = None
         self.success = None
         self.bet_enum = None
+        self.is_rx_on = True
 
         # Kwargs needed to create commands out of methods.
         self.command_kwargs = {
@@ -205,6 +205,9 @@ class HigherOrLowerBot(IHigherOrLowerBot):
             dots = '.' * i
             await ctx.send(f"rolling {dots}")
             time.sleep((i+1) * SLEEP_STEP)
+
+
+IHigherOrLowerBot.register(HigherOrLowerBot)
 
 
 def did_i_die():
