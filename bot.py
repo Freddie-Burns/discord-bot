@@ -108,6 +108,24 @@ class HigherOrLowerBot(commands.Bot):
         for meth, kwargs in self.command_kwargs.items():
             self.add_command(commands.command(**kwargs)(meth))
 
+    def _bet_message(self):
+        bet_str = bet_strings[self.bet_enum]
+        if self.success is None:
+            return f"self.success is None."
+        elif self.success:
+            emoji = random.choice(GOOD_EMOJIS)
+            return f"{self.second_value} - {bet_str} was correct! {emoji}"
+        else:
+            emoji = random.choice(BAD_EMOJIS)
+            return f"{self.second_value} - {bet_str} was wrong. {emoji}"
+
+    def _reset_roll_params(self):
+        self.first_value = None
+        self.second_value = None
+        self.sides = None
+        self.success = None
+        self.bet_enum = None
+
     async def _second_roll(self, ctx):
         """Based on params of first roll & the bet made."""
         if self.first_value is None:
@@ -134,24 +152,6 @@ class HigherOrLowerBot(commands.Bot):
         # Send msg and reset roll params.
         await ctx.send(message)
         self._reset_roll_params()
-
-    def _bet_message(self):
-        bet_str = bet_strings[self.bet_enum]
-        if self.success is None:
-            return f"self.success is None."
-        elif self.success:
-            emoji = random.choice(GOOD_EMOJIS)
-            return f"{self.second_value} - {bet_str} was correct! {emoji}"
-        else:
-            emoji = random.choice(BAD_EMOJIS)
-            return f"{self.second_value} - {bet_str} was wrong. {emoji}"
-
-    def _reset_roll_params(self):
-        self.first_value = None
-        self.second_value = None
-        self.sides = None
-        self.success = None
-        self.bet_enum = None
 
 
 def did_i_die():
