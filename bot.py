@@ -16,7 +16,8 @@ from dotenv import load_dotenv
 load_dotenv(encoding='utf-8')
 DEATH_PROB = float(os.getenv('DEATH_PROB'))
 MAX_SLEEP = float(os.getenv('MAX_SLEEP'))
-TOKEN = os.getenv('DISCORD_TOKEN')
+SLEEP_STEP = float(os.getenv('SLEEP_STEP'))
+TOKEN = os.getenv('TEST_TOKEN')
 
 BAD_EMOJIS = os.getenv('BAD_EMOJIS').split(',')
 GOOD_EMOJIS = os.getenv('GOOD_EMOJIS').split(',')
@@ -138,21 +139,28 @@ class HigherOrLowerBot(commands.Bot):
         else:
             # Choose rand int with same range as first roll.
             self.second_value = random.randint(1, self.sides)
-            await ctx.send("rolling...")
 
             # Uses bet_enum value to choose operation from dict.
             math_op = self.bet_operator[self.bet_enum]
             self.success = math_op(self.second_value, self.first_value)
             message = self._bet_message()
 
-            # Wait random time and log to the console.
-            sleep_time = random.randint(0, MAX_SLEEP)
-            print(f"sleep {sleep_time}s")
-            time.sleep(sleep_time)
+            # Build tension.
+            await self._suspense_messages(ctx)
 
         # Send msg and reset roll params.
         await ctx.send(message)
         self._reset_roll_params()
+
+    @staticmethod
+    async def _suspense_messages(ctx):
+        # Wait random time and log to the console.
+        msg_num = random.randint(0, MAX_SLEEP)
+        print(f"sleep {msg_num}")
+        for i in range(msg_num):
+            dots = '.' * i
+            await ctx.send(f"rolling {dots}")
+            time.sleep(i * SLEEP_STEP)
 
 
 def did_i_die():
