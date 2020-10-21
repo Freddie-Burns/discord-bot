@@ -146,11 +146,14 @@ class HigherOrLowerBot(commands.Bot):
                 await ctx.send(msg)
 
     async def first_roll(self, ctx, sides=6):
+        bid_message = "Did you know? Bid Deals is Gungan for \"The floppy eared one\" a great honour among Gungans."
         with CheckRxChannel(self) as is_open:
             if is_open:
                 self.first_value = random.randint(1, sides)
                 self.sides = sides
                 await ctx.send(self.first_value)
+                if random.random() < 0.1:
+                    await ctx.send(bid_message)
 
     async def higher(self, ctx):
         with CheckRxChannel(self) as is_open:
