@@ -132,6 +132,11 @@ class HigherOrLowerBot(commands.Bot):
                 'name': 'infected',
                 'aliases': [],
             },
+            self.particle_model: {
+                'parent': self,
+                'name': 'particles',
+                'aliases': [],
+            },
         }
         self._add_all_commands()
 
@@ -235,6 +240,14 @@ class HigherOrLowerBot(commands.Bot):
         # Build tension by sending "rolling" messages.
         for i in range(msg_num):
             dots = '.' * i
+            await ctx.send(f"rolling {dots}")
+            time.sleep((i+1) * SLEEP_STEP)
+
+    @staticmethod
+    async def particle_model(ctx):
+        # Particles come apart.
+        for i in range(5):
+            dots = ('' + ' ' * i).join(['.'] * 5)
             await ctx.send(f"rolling {dots}")
             time.sleep((i+1) * SLEEP_STEP)
 
