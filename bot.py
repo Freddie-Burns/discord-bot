@@ -251,7 +251,7 @@ class HigherOrLowerBot(commands.Bot):
                     dots = ('' + ' ' * i).join(['.'] * number)
                     await ctx.send(dots)
                     time.sleep((1 + i / speed) * SLEEP_STEP)
-                for i in range(6, -1, -1):
+                for i in range(5, -1, -1):
                     dots = ('' + ' ' * i).join(['.'] * number)
                     await ctx.send(dots)
                     time.sleep((i+1) * SLEEP_STEP)
