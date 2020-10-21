@@ -243,18 +243,10 @@ class HigherOrLowerBot(commands.Bot):
             await ctx.send(f"rolling {dots}")
             time.sleep((i+1) * SLEEP_STEP)
 
-    async def particle_model(self, ctx, number=10, speed=5):
+    async def particle_model(self, ctx):
         with CheckRxChannel(self) as is_open:
             if is_open:
-                # Particles come apart.
-                for i in range(5):
-                    dots = ('' + ' ' * i).join(['.'] * number)
-                    await ctx.send(dots)
-                    # time.sleep((1 + i / speed) * SLEEP_STEP)
-                for i in range(5, -1, -1):
-                    dots = ('' + ' ' * i).join(['.'] * number)
-                    await ctx.send(dots)
-                    # time.sleep((i+1) * SLEEP_STEP)
+                await ctx.send("Particles depricated, I hated it.")
 
 
 IHigherOrLowerBot.register(HigherOrLowerBot)
