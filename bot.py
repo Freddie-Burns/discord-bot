@@ -138,7 +138,7 @@ class HigherOrLowerBot(commands.Bot):
     async def infected(self, ctx, prob):
         with CheckRxChannel(self) as is_open:
             if is_open:
-                infected = random.random() < prob
+                infected = random.random() < float(prob)
                 if infected:
                     msg = "You are infected!"
                 else:
