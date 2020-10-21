@@ -124,8 +124,8 @@ class HigherOrLowerBot(commands.Bot):
             },
             self.random: {
                 'parent': self,
-                'name': 'random',
-                'aliases': ['r', 'rand'],
+                'name': 'rand',
+                'aliases': [],
             },
         }
         self._add_all_commands()
