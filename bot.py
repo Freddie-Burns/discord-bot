@@ -249,7 +249,7 @@ class HigherOrLowerBot(commands.Bot):
         for i in range(5):
             dots = ('' + ' ' * i).join(['.'] * 5)
             await ctx.send(dots)
-            time.sleep((i+1) * SLEEP_STEP)
+            time.sleep((i+1) * SLEEP_STEP / 5)
 
 
 IHigherOrLowerBot.register(HigherOrLowerBot)
