@@ -127,8 +127,23 @@ class HigherOrLowerBot(commands.Bot):
                 'name': 'rand',
                 'aliases': [],
             },
+            self.infected: {
+                'parent': self,
+                'name': 'infected',
+                'aliases': [],
+            },
         }
         self._add_all_commands()
+
+    async def infected(self, ctx, prob):
+        with CheckRxChannel(self) as is_open:
+            if is_open:
+                infected = random.random() < prob
+                if infected:
+                    msg = "You are infected!"
+                else:
+                    msg = "Not infected."
+                await ctx.send(msg)
 
     async def first_roll(self, ctx, sides=6):
         with CheckRxChannel(self) as is_open:
