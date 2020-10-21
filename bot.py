@@ -248,7 +248,7 @@ class HigherOrLowerBot(commands.Bot):
         # Particles come apart.
         for i in range(5):
             dots = ('' + ' ' * i).join(['.'] * 5)
-            await ctx.send(f"rolling {dots}")
+            await ctx.send(dots)
             time.sleep((i+1) * SLEEP_STEP)
 
 
