@@ -6,24 +6,46 @@ DEATH_PROB, MAX_SLEEP, TOKEN, and EMOJIS.
 
 import operator
 import os
+import pickle
 import random
 import time
-from abc import ABC
 from enum import Enum
 
 from discord.ext import commands
+from discord.ext.commands.context import Context
+from discord.guild import Guild
 from dotenv import load_dotenv
 
 
 load_dotenv(encoding='utf-8')
 DEATH_PROB = float(os.getenv('DEATH_PROB'))
+FACT_PROB = float(os.getenv('FACT_PROB'))
 MIN_SLEEP = float(os.getenv('MIN_SLEEP'))
 MAX_SLEEP = float(os.getenv('MAX_SLEEP'))
 SLEEP_STEP = float(os.getenv('SLEEP_STEP'))
-TOKEN = os.getenv('DISCORD_TOKEN')
+TOKEN = os.getenv('TEST_TOKEN')
 
 GOOD_EMOJIS = "🤩🥳😘🤗😲👽😼🎉🎀🎊"
 BAD_EMOJIS = "🙃🤬😭😤🥺😖😒🤯🥵🥶😱😳👹⛈💔❌⛔🔕"
+
+
+class BetEnum(Enum):
+    lower = 0
+    same = 1
+    higher = 2
+
+
+BET_STRINGS = {
+    BetEnum.lower: "Lower",
+    BetEnum.same: "The same",
+    BetEnum.higher: "Higher",
+}
+BET_OPS = {
+    BetEnum.lower: operator.lt,
+    BetEnum.same: operator.eq,
+    BetEnum.higher: operator.gt,
+}
+GUILDS = {}
 
 
 def main():
@@ -33,22 +55,15 @@ def main():
     bot.run(TOKEN)
 
 
-class BetEnum(Enum):
-    lower = 0
-    same = 1
-    higher = 2
-
-
-bet_strings = {
-    BetEnum.lower: "Lower",
-    BetEnum.same: "The same",
-    BetEnum.higher: "Higher",
-}
-
-
-class IHigherOrLowerBot(ABC):
-    """Bot interface for type hinting context manager."""
-    is_rx_on = True
+class HorlGuild:
+    def __init__(self, guild: Guild):
+        self.guild = guild
+        self.first_value = None
+        self.second_value = None
+        self.sides = None
+        self.success = None
+        self.bet_enum = None
+        self.is_rx_on = True
 
 
 class CheckRxChannel:
@@ -57,26 +72,24 @@ class CheckRxChannel:
     Returns bool of rx channel is open. If false do not run
     another command.
     """
-    def __init__(self, bot: IHigherOrLowerBot):
-        self.bot = bot
+    def __init__(self, ctx: Context):
+        if ctx.guild.id not in GUILDS.keys():
+            GUILDS[ctx.guild.id] = HorlGuild(ctx.guild)
+        self.guild: HorlGuild = GUILDS[ctx.guild.id]
         self.keep_closed = False
 
     def __enter__(self):
         # If rx not on, don't execute command.
-        exec_cmd = self.bot.is_rx_on
+        exec_cmd = self.guild.is_rx_on
         # If rx is open, close it to lock out other cmds.
         # If rx is closed, keep it closed when exiting.
-        if self.bot.is_rx_on:
-            self.bot.is_rx_on = False
-        else:
-            self.keep_closed = True
+        if self.guild.is_rx_on: self.guild.is_rx_on = False
+        else: self.keep_closed = True
         return exec_cmd
 
     def __exit__(self, e, v, t):
-        if self.keep_closed:
-            self.bot.is_rx_on = False
-        else:
-            self.bot.is_rx_on = True
+        if self.keep_closed: self.guild.is_rx_on = False
+        else: self.guild.is_rx_on = True
 
 
 class HigherOrLowerBot(commands.Bot):
@@ -88,18 +101,6 @@ class HigherOrLowerBot(commands.Bot):
             description="Come play the galaxy's favourite game!",
             *args, **kwargs,
         )
-        self.bet_operator = {
-            BetEnum.lower: operator.lt,
-            BetEnum.same: operator.eq,
-            BetEnum.higher: operator.gt,
-        }
-        self.first_value = None
-        self.second_value = None
-        self.sides = None
-        self.success = None
-        self.bet_enum = None
-        self.is_rx_on = True
-
         # Kwargs needed to create commands out of methods.
         self.command_kwargs = {
             self.first_roll: {
@@ -140,8 +141,76 @@ class HigherOrLowerBot(commands.Bot):
         }
         self._add_all_commands()
 
-    async def infected(self, ctx, prob):
-        with CheckRxChannel(self) as is_open:
+    async def higher(self, ctx):
+        with CheckRxChannel(ctx) as is_open:
+            if is_open:
+                guild = GUILDS[ctx.guild.id]
+                guild.bet_enum = BetEnum.higher
+                await self._second_roll(ctx)
+
+    async def lower(self, ctx):
+        with CheckRxChannel(ctx) as is_open:
+            if is_open:
+                guild = GUILDS[ctx.guild.id]
+                guild.bet_enum = BetEnum.lower
+                await self._second_roll(ctx)
+
+    async def random(self, ctx):
+        with CheckRxChannel(ctx) as is_open:
+            if is_open:
+                guild = GUILDS[ctx.guild.id]
+                guild.bet_enum = random.choice(list(BetEnum))
+                await self._second_roll(ctx)
+
+    async def same(self, ctx):
+        with CheckRxChannel(ctx) as is_open:
+            if is_open:
+                guild = GUILDS[ctx.guild.id]
+                guild.bet_enum = BetEnum.same
+                await self._second_roll(ctx)
+
+    def _add_all_commands(self):
+        """Create commands from methods, add them to internal list."""
+        for meth, kwargs in self.command_kwargs.items():
+            self.add_command(commands.command(**kwargs)(meth))
+
+    async def _second_roll(self, ctx):
+        """Based on params of first roll & the bet made."""
+        guild = GUILDS[ctx.guild.id]
+        if guild.first_value is None:
+            message = "Roll before betting."
+        elif did_i_die():
+            message = "You died... 🙃"
+        else:
+            # Choose rand int with same range as first roll.
+            guild.second_value = random.randint(1, guild.sides)
+            # Uses bet_enum value to choose operation from dict.
+            math_op = BET_OPS[guild.bet_enum]
+            guild.success = math_op(guild.second_value, guild.first_value)
+            message = self._bet_message(ctx)
+            # Build tension.
+            await self._suspense_messages(ctx)
+
+        # Send msg and reset roll params.
+        await ctx.send(message)
+        self._reset_roll_params(guild)
+
+    @staticmethod
+    async def first_roll(ctx, sides=6):
+        with CheckRxChannel(ctx) as is_open:
+            if is_open:
+                guild = GUILDS[ctx.guild.id]
+                guild.first_value = random.randint(1, sides)
+                guild.sides = sides
+                await ctx.send(guild.first_value)
+                if random.random() < FACT_PROB:
+                    with open("facts.pkl", "rb") as file:
+                        fact = random.choice(pickle.load(file))
+                        await ctx.send(fact)
+
+    @staticmethod
+    async def infected(ctx, prob):
+        with CheckRxChannel(ctx) as is_open:
             if is_open:
                 infected = random.random() < float(prob)
                 if infected:
@@ -150,85 +219,34 @@ class HigherOrLowerBot(commands.Bot):
                     msg = "Not infected."
                 await ctx.send(msg)
 
-    async def first_roll(self, ctx, sides=6):
-        bid_message = "Did you know? Bid Deals is Gungan for \"The floppy eared one\" a great honour among Gungans."
-        with CheckRxChannel(self) as is_open:
+    @staticmethod
+    async def particle_model(ctx):
+        with CheckRxChannel(ctx) as is_open:
             if is_open:
-                self.first_value = random.randint(1, sides)
-                self.sides = sides
-                await ctx.send(self.first_value)
-                if random.random() < 0.1:
-                    await ctx.send(bid_message)
+                await ctx.send("Particles depricated, I hated it.")
 
-    async def higher(self, ctx):
-        with CheckRxChannel(self) as is_open:
-            if is_open:
-                self.bet_enum = BetEnum.higher
-                await self._second_roll(ctx)
-
-    async def lower(self, ctx):
-        with CheckRxChannel(self) as is_open:
-            if is_open:
-                self.bet_enum = BetEnum.lower
-                await self._second_roll(ctx)
-
-    async def random(self, ctx):
-        with CheckRxChannel(self) as is_open:
-            if is_open:
-                self.bet_enum = random.choice(list(BetEnum))
-                await self._second_roll(ctx)
-
-    async def same(self, ctx):
-        with CheckRxChannel(self) as is_open:
-            if is_open:
-                self.bet_enum = BetEnum.same
-                await self._second_roll(ctx)
-
-    def _add_all_commands(self):
-        """Create commands from methods, add them to internal list."""
-        for meth, kwargs in self.command_kwargs.items():
-            self.add_command(commands.command(**kwargs)(meth))
-
-    def _bet_message(self):
-        bet_str = bet_strings[self.bet_enum]
-        if self.success is None:
+    @staticmethod
+    def _bet_message(ctx):
+        guild = GUILDS[ctx.guild.id]
+        bet_str = BET_STRINGS[guild.bet_enum]
+        if guild.success is None:
             return f"self.success is None."
-        elif self.success:
+        elif guild.success:
             emoji = random.choice(GOOD_EMOJIS)
-            return f"{self.second_value} - {bet_str} was correct! {emoji}"
+            return f"{guild.second_value} - {bet_str} was correct! {emoji}"
         else:
             emoji = random.choice(BAD_EMOJIS)
-            message = f"{self.second_value} - {bet_str} was wrong, "\
+            message = f"{guild.second_value} - {bet_str} was wrong, "\
                       f"you lose. {emoji}"
             return message
 
-    def _reset_roll_params(self):
-        self.first_value = None
-        self.second_value = None
-        self.sides = None
-        self.success = None
-        self.bet_enum = None
-
-    async def _second_roll(self, ctx):
-        """Based on params of first roll & the bet made."""
-
-        if self.first_value is None:
-            message = "Roll before betting."
-        elif did_i_die():
-            message = "You died... 🙃"
-        else:
-            # Choose rand int with same range as first roll.
-            self.second_value = random.randint(1, self.sides)
-            # Uses bet_enum value to choose operation from dict.
-            math_op = self.bet_operator[self.bet_enum]
-            self.success = math_op(self.second_value, self.first_value)
-            message = self._bet_message()
-            # Build tension.
-            await self._suspense_messages(ctx)
-
-        # Send msg and reset roll params.
-        await ctx.send(message)
-        self._reset_roll_params()
+    @staticmethod
+    def _reset_roll_params(guild):
+        guild.first_value = None
+        guild.second_value = None
+        guild.sides = None
+        guild.success = None
+        guild.bet_enum = None
 
     @staticmethod
     async def _suspense_messages(ctx):
@@ -242,14 +260,6 @@ class HigherOrLowerBot(commands.Bot):
             dots = '.' * i
             await ctx.send(f"rolling {dots}")
             time.sleep((i+1) * SLEEP_STEP)
-
-    async def particle_model(self, ctx):
-        with CheckRxChannel(self) as is_open:
-            if is_open:
-                await ctx.send("Particles depricated, I hated it.")
-
-
-IHigherOrLowerBot.register(HigherOrLowerBot)
 
 
 def did_i_die():
