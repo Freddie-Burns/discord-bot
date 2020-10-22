@@ -23,7 +23,7 @@ FACT_PROB = float(os.getenv('FACT_PROB'))
 MIN_SLEEP = float(os.getenv('MIN_SLEEP'))
 MAX_SLEEP = float(os.getenv('MAX_SLEEP'))
 SLEEP_STEP = float(os.getenv('SLEEP_STEP'))
-TOKEN = os.getenv('TEST_TOKEN')
+TOKEN = os.getenv('DISCORD_TOKEN')
 
 GOOD_EMOJIS = "🤩🥳😘🤗😲👽😼🎉🎀🎊"
 BAD_EMOJIS = "🙃🤬😭😤🥺😖😒🤯🥵🥶😱😳👹⛈💔❌⛔🔕"
@@ -223,7 +223,7 @@ class HigherOrLowerBot(commands.Bot):
     async def particle_model(ctx):
         with CheckRxChannel(ctx) as is_open:
             if is_open:
-                await ctx.send("Particles depricated, I hated it.")
+                await ctx.send("Particles has been depricated, I hated it.")
 
     @staticmethod
     def _bet_message(ctx):
