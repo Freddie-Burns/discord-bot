@@ -223,7 +223,7 @@ class HigherOrLowerBot(commands.Bot):
     async def particle_model(ctx):
         with CheckRxChannel(ctx) as is_open:
             if is_open:
-                await ctx.send("Particles depricated, I hated it.")
+                await ctx.send("Particles has been depricated, I hated it.")
 
     @staticmethod
     def _bet_message(ctx):
