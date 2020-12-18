@@ -4,6 +4,8 @@ Update the environment variables on the host server to set the
 DEATH_PROB, MAX_SLEEP, TOKEN, and EMOJIS.
 """
 
+# Why has it crashed? 18/12/20
+
 import operator
 import os
 import pickle
